@@ -52,9 +52,14 @@ export const registerUser = async (payload, set) => {
 
     const res = await api.post("/auth/register", payload);
 
-    set({
-      loading: false,
-    });
+    set({ loading: false });
+
+    // 👇 redirect to login with same OIDC params
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+      window.location.href = `/login?${params.toString()}`;
+      return;
+    }
 
     return res.data;
   } catch (error) {
