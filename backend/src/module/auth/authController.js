@@ -2,19 +2,26 @@ import ApiResponse from "../../../src/common/utils/apiResponse.js"
 import { generateAccessToken } from "../../common/utils/jwtUtills.js";
 import * as authService from "./authServices.js"
 import crypto from "crypto"
-const register=async(req,res)=>{
-    const {name,email,password}=req.body
-    const user=await authService.register(name,email,password)
-     return res.redirect(
-    `/login?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
-  );
- ApiResponse.created(
+const register = async (req, res) => {
+  const { name, email, password } = req.body;
+  const { client_id, redirect_uri, response_type, scope } = req.query; // 👈 get from query
+
+  const user = await authService.register(name, email, password);
+
+  if (client_id && redirect_uri) {
+    // OIDC flow - redirect to login
+    return res.redirect(
+      `/login?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
+    );
+  }
+
+  // normal flow - return JSON
+  return ApiResponse.created(
     res,
     "Registration successful. Please verify your email.",
     user,
   );
-
-}
+};
 
 const login = async (req, res) => {
   const { email, password } = req.body;
