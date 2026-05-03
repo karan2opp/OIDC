@@ -14,6 +14,10 @@ const register=async(req,res)=>{
 
 const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log("login hit");
+  console.log("login session id:", req.sessionID);
+  console.log("login returnTo:", req.session.returnTo);
+  console.log("login cookies:", req.cookies);
   const {
     user,
     accessToken,
