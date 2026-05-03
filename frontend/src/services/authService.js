@@ -13,7 +13,7 @@ export const loginUser = async (payload, set) => {
     const responseData = res.data.data;
     console.log("responseData:", responseData);
 if (res.data.data.redirectTo) {
-  window.location.href = `http://localhost:8001${res.data.data.redirectTo}`; // ✅
+  window.location.href = `${import.meta.env.VITE_OIDC_URL}${res.data.data.redirectTo}`;
   return;
 }
     const user = res.data.data.user;
