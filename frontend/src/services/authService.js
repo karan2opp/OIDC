@@ -50,12 +50,15 @@ export const registerUser = async (payload, set) => {
   try {
     set({ loading: true, error: null });
 
-    const res = await api.post("/auth/register", payload);
+    // 👇 get OIDC params from URL
+    const params = new URLSearchParams(window.location.search);
+
+    // 👇 send params as query string to backend
+    const res = await api.post(`/auth/register?${params.toString()}`, payload);
 
     set({ loading: false });
 
     // 👇 redirect to login with same OIDC params
-    const params = new URLSearchParams(window.location.search);
     if (params.toString()) {
       window.location.href = `/login?${params.toString()}`;
       return;
@@ -67,7 +70,6 @@ export const registerUser = async (payload, set) => {
       loading: false,
       error: error.response?.data?.message || "Registration failed",
     });
-
     throw error;
   }
 };
