@@ -30,9 +30,11 @@ const jwks = async (req, res) => {
 
 const authorize = async (req, res) => {
   const { client_id, redirect_uri, state } = req.query;
- console.log("authorize hit"); // 👈
-  console.log("session user:", req.session.user); // 👈
-  console.log("returnTo:", req.session.returnTo); 
+console.log("authorize hit");
+  console.log("session id:", req.sessionID);
+  console.log("all cookies:", req.cookies);
+  console.log("session user:", req.session.user);
+  console.log("returnTo:", req.session.returnTo);
   if (!client_id || !redirect_uri) {
     throw ApiError.badRequest("client_id and redirect_uri are required");
   }
