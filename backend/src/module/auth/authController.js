@@ -4,26 +4,24 @@ import * as authService from "./authServices.js"
 import crypto from "crypto"
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-  const { client_id, redirect_uri, response_type, scope } = req.query; // 👈 get from query
-console.log(client_id,redirect_uri,response_type,scope);
+  const { client_id, redirect_uri, response_type, scope } = req.query;
+
+  console.log("req.query:", req.query); // 👈 add this to debug
 
   const user = await authService.register(name, email, password);
 
   if (client_id && redirect_uri) {
-    // OIDC flow - redirect to login
     return res.redirect(
       `/login?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
     );
   }
 
-  // normal flow - return JSON
   return ApiResponse.created(
     res,
     "Registration successful. Please verify your email.",
     user,
   );
 };
-
 const login = async (req, res) => {
   const { email, password } = req.body;
 
