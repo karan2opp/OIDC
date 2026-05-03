@@ -12,7 +12,7 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL,           // https://auth.karanop.in
-      process.env.CHECKBOX_URL,           // https://checkbox.karanop.in
+      process.env.CLIENT_URL,           // https://checkbox.karanop.in
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
