@@ -24,20 +24,14 @@ import session from "express-session";
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "super_secret_key",
-
+    secret: process.env.SESSION_SECRET,
     resave: false,
-
     saveUninitialized: false,
-
     cookie: {
       httpOnly: true,
-
-      secure: process.env.NODE_ENV === "production",
-
-      sameSite: "lax",
-
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: true,        // 👈 must be true in production with HTTPS
+      sameSite: "none",    // 👈 must be none for cross-domain
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
