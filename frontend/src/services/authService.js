@@ -16,14 +16,15 @@ console.log("loginToken:", responseData.loginToken); // 👈
     const params = new URLSearchParams(window.location.search);
     const returnTo = params.get("returnTo");
 
-    if (returnTo) {
-      const oidcUrl = import.meta.env.VITE_OIDC_URL || "https://api.karanop.in";
-      const decodedReturnTo = decodeURIComponent(returnTo);
-      // append loginToken to authorize URL
-      const separator = decodedReturnTo.includes("?") ? "&" : "?";
-      window.location.href = `${oidcUrl}${decodedReturnTo}${separator}login_token=${responseData.loginToken}`;
-      return;
-    }
+   if (returnTo) {
+  const oidcUrl = import.meta.env.VITE_OIDC_URL || "https://api.karanop.in";
+  const decodedReturnTo = decodeURIComponent(returnTo);
+  const separator = decodedReturnTo.includes("?") ? "&" : "?";
+  const finalUrl = `${oidcUrl}${decodedReturnTo}${separator}login_token=${responseData.loginToken}`;
+  console.log("redirecting to:", finalUrl); // 👈
+  window.location.href = finalUrl;
+  return;
+}
 
     const user = responseData.user;
     const accessToken = responseData.accessToken;
