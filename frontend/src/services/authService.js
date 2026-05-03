@@ -11,11 +11,14 @@ export const loginUser = async (payload, set) => {
     const res = await api.post("/auth/login", payload);
     console.log("login response:", res.data);
     const responseData = res.data.data;
+    const params = new URLSearchParams(window.location.search);
+const returnTo = params.get("returnTo");
     console.log("responseData:", responseData);
     console.log("VITE_OIDC_URL:", import.meta.env.VITE_OIDC_URL);
 console.log("redirectTo:", res.data.data.redirectTo);
-if (res.data.data.redirectTo) {
-  window.location.href = `${import.meta.env.VITE_OIDC_URL}${res.data.data.redirectTo}`;
+if (responseData.redirectTo || returnTo) {
+  const url = responseData.redirectTo || decodeURIComponent(returnTo);
+  window.location.href = `${import.meta.env.VITE_OIDC_URL || "https://api.karanop.in"}${url}`;
   return;
 }
 

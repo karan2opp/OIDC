@@ -51,16 +51,8 @@ console.log("authorize hit");
     throw ApiError.unauthorized("Invalid redirect URI");
   }
 if (!req.session.user) {
-  req.session.returnTo = req.originalUrl;
-  console.log("setting returnTo:", req.session.returnTo); // 👈
-  console.log("session before save:", req.session); // 👈
-  
-  return req.session.save((err) => {
-    console.log("session after save:", req.session); // 👈
-    console.log("session id after save:", req.sessionID); // 👈
-    if (err) console.log("save error:", err);
-    res.redirect(`${process.env.FRONTEND_URL}/login`);
-  });
+  const returnTo = encodeURIComponent(req.originalUrl);
+  return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
 }
 
   const code = await oidcService.generateAuthorizationCode({
