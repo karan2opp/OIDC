@@ -1,10 +1,8 @@
-// oidcController.js
-
 import * as oidcService from "./oidcServices.js";
 import ApiResponse from "../../common/utils/apiResponse.js";
 import ApiError from "../../common/utils/apiError.js";
-import { generateAccessToken, verifyAccessToken } from "../../common/utils/jwtUtills.js";
 import * as clientService from "../client/clientService.js";
+import { verifyAccessToken } from "../../common/utils/jwtUtills.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -28,25 +26,62 @@ const jwks = async (req, res) => {
   return res.json(data);
 };
 
-if (login_token) {
-  try {
-    const decoded = verifyAccessToken(login_token);
-    userId = decoded.id;
-    console.log("decoded userId:", userId); // 👈
-  } catch (err) {
-    console.log("invalid login token:", err.message); // 👈
-  }
-}
+const authorize = async (req, res) => {
+  const { client_id, redirect_uri, state, login_token } = req.query;
 
-console.log("final userId:", userId); // 👈
+  if (!client_id || !redirect_uri) {
+    throw ApiError.badRequest("client_id and redirect_uri are required");
+  }
+
+  const client = await clientService.getClientById(client_id);
+
+  if (!client) {
+    throw ApiError.unauthorized("Invalid client");
+  }
+
+  const isValidRedirectUri = client.redirectUris.includes(redirect_uri);
+
+  if (!isValidRedirectUri) {
+    throw ApiError.unauthorized("Invalid redirect URI");
+  }
+
+  // verify login token if present
+  let userId = null;
+
+  if (login_token) {
+    try {
+      const decoded = verifyAccessToken(login_token);
+      userId = decoded.id;
+      console.log("decoded userId:", userId);
+    } catch (err) {
+      console.log("invalid login token:", err.message);
+    }
+  }
+
+  // fallback to session
+  if (!userId && req.session.user) {
+    userId = req.session.user.id;
+  }
+
+  console.log("final userId:", userId);
+
+  // not authenticated
+  if (!userId) {
+    const returnTo = encodeURIComponent(req.originalUrl);
+    return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
+  }
+
+  const code = await oidcService.generateAuthorizationCode({
+    userId,
+    clientId: client_id,
+    redirectUri: redirect_uri,
+  });
+
+  return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
+};
+
 const token = async (req, res) => {
-  const {
-    code,
-    client_id,
-    client_secret,
-    redirect_uri,
-    grant_type,
-  } = req.body;
+  const { code, client_id, client_secret, redirect_uri, grant_type } = req.body;
 
   if (!code || !client_id || !client_secret || !redirect_uri) {
     throw ApiError.badRequest("Missing required fields");
@@ -56,7 +91,7 @@ const token = async (req, res) => {
     throw ApiError.badRequest("Unsupported grant type");
   }
 
-    const client = await clientService.getClientById(client_id);
+  const client = await clientService.getClientById(client_id);
 
   if (client.clientSecret !== client_secret) {
     throw ApiError.unauthorized("Invalid client secret");
