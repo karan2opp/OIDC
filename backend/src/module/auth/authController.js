@@ -5,6 +5,7 @@ import crypto from "crypto"
 const register = async (req, res) => {
   const { name, email, password } = req.body;
   const { client_id, redirect_uri, response_type, scope } = req.query; // 👈 get from query
+console.log(client_id,redirect_uri,response_type,scope);
 
   const user = await authService.register(name, email, password);
 
