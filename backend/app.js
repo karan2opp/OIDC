@@ -10,8 +10,11 @@ configDotenv();
 const app=express()
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, // frontend URL
-    credentials: true, // allow cookies / auth tokens
+    origin: [
+      process.env.FRONTEND_URL,           // https://auth.karanop.in
+      process.env.CHECKBOX_URL,           // https://checkbox.karanop.in
+    ],
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
