@@ -28,56 +28,17 @@ const jwks = async (req, res) => {
   return res.json(data);
 };
 
-const authorize = async (req, res) => {
-  const { client_id, redirect_uri, state, login_token } = req.query;
-
-  if (!client_id || !redirect_uri) {
-    throw ApiError.badRequest("client_id and redirect_uri are required");
+if (login_token) {
+  try {
+    const decoded = verifyAccessToken(login_token);
+    userId = decoded.id;
+    console.log("decoded userId:", userId); // 👈
+  } catch (err) {
+    console.log("invalid login token:", err.message); // 👈
   }
+}
 
-  const client = await clientService.getClientById(client_id);
-
-  if (!client) {
-    throw ApiError.unauthorized("Invalid client");
-  }
-
-  const isValidRedirectUri = client.redirectUris.includes(redirect_uri);
-
-  if (!isValidRedirectUri) {
-    throw ApiError.unauthorized("Invalid redirect URI");
-  }
-
-  // verify login token if present
-  let userId = null;
-
-  if (login_token) {
-    try {
-      const decoded = verifyAccessToken(login_token);
-      userId = decoded.id;
-    } catch (err) {
-      console.log("invalid login token:", err.message);
-    }
-  }
-
-  // fallback to session
-  if (!userId && req.session.user) {
-    userId = req.session.user.id;
-  }
-
-  // not authenticated
-  if (!userId) {
-    const returnTo = encodeURIComponent(req.originalUrl);
-    return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
-  }
-
-  const code = await oidcService.generateAuthorizationCode({
-    userId,
-    clientId: client_id,
-    redirectUri: redirect_uri,
-  });
-
-  return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
-};
+console.log("final userId:", userId); // 👈
 const token = async (req, res) => {
   const {
     code,
