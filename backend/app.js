@@ -29,11 +29,11 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // 👈 change from false to true
     cookie: {
       httpOnly: true,
-      secure: true,        // 👈 must be true in production with HTTPS
-      sameSite: "none",    // 👈 must be none for cross-domain
+      secure: true,
+      sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
