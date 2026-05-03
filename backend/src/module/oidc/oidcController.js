@@ -3,7 +3,7 @@
 import * as oidcService from "./oidcServices.js";
 import ApiResponse from "../../common/utils/apiResponse.js";
 import ApiError from "../../common/utils/apiError.js";
-
+import { generateAccessToken, verifyAccessToken } from "../../common/utils/jwtUtills.js";
 import * as clientService from "../client/clientService.js";
 import dotenv from "dotenv";
 dotenv.config();
@@ -29,10 +29,7 @@ const jwks = async (req, res) => {
 };
 
 const authorize = async (req, res) => {
-  const { client_id, redirect_uri, state } = req.query;
-  console.log("authorize hit");
-  console.log("session id:", req.sessionID);
-  console.log("session user:", req.session.user);
+  const { client_id, redirect_uri, state, login_token } = req.query;
 
   if (!client_id || !redirect_uri) {
     throw ApiError.badRequest("client_id and redirect_uri are required");
@@ -50,13 +47,31 @@ const authorize = async (req, res) => {
     throw ApiError.unauthorized("Invalid redirect URI");
   }
 
-  if (!req.session.user) {
+  // verify login token if present
+  let userId = null;
+
+  if (login_token) {
+    try {
+      const decoded = verifyAccessToken(login_token);
+      userId = decoded.id;
+    } catch (err) {
+      console.log("invalid login token:", err.message);
+    }
+  }
+
+  // fallback to session
+  if (!userId && req.session.user) {
+    userId = req.session.user.id;
+  }
+
+  // not authenticated
+  if (!userId) {
     const returnTo = encodeURIComponent(req.originalUrl);
     return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
   }
 
   const code = await oidcService.generateAuthorizationCode({
-    userId: req.session.user.id,
+    userId,
     clientId: client_id,
     redirectUri: redirect_uri,
   });

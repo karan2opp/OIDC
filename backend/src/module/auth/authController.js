@@ -1,4 +1,5 @@
 import ApiResponse from "../../../src/common/utils/apiResponse.js"
+import { generateAccessToken } from "../../common/utils/jwtUtills.js";
 import * as authService from "./authServices.js"
 import crypto from "crypto"
 const register=async(req,res)=>{
@@ -14,32 +15,25 @@ const register=async(req,res)=>{
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log("login hit");
-  console.log("login session id:", req.sessionID);
 
   const { user, accessToken, refreshToken } = await authService.login(email, password);
-
-  req.session.user = {
-    id: user._id,
-    email: user.email,
-  };
-
-  // save session before responding
-  await new Promise((resolve) => req.session.save(resolve));
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "none", // 👈 changed from strict to none
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
+
+  // generate short lived login token for OIDC flow
+  const loginToken = generateAccessToken({ id: user._id, role: user.role });
 
   ApiResponse.ok(res, "Login successful", {
     user,
     accessToken,
+    loginToken, // 👈 used for OIDC redirect
   });
 };
-
 const logout=async(req,res)=>{
   await authService.logout(req.body.id)
    res.clearCookie("refreshToken");

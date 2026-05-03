@@ -14,11 +14,13 @@ export const loginUser = async (payload, set) => {
     // get returnTo from URL
     const params = new URLSearchParams(window.location.search);
     const returnTo = params.get("returnTo");
-    console.log("returnTo from URL:", returnTo);
 
     if (returnTo) {
       const oidcUrl = import.meta.env.VITE_OIDC_URL || "https://api.karanop.in";
-      window.location.href = `${oidcUrl}${decodeURIComponent(returnTo)}`;
+      const decodedReturnTo = decodeURIComponent(returnTo);
+      // append loginToken to authorize URL
+      const separator = decodedReturnTo.includes("?") ? "&" : "?";
+      window.location.href = `${oidcUrl}${decodedReturnTo}${separator}login_token=${responseData.loginToken}`;
       return;
     }
 
@@ -42,7 +44,6 @@ export const loginUser = async (payload, set) => {
     throw error;
   }
 };
-
 export const registerUser = async (payload, set) => {
   try {
     set({ loading: true, error: null });
