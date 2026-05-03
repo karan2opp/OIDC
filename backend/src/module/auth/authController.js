@@ -5,6 +5,9 @@ import crypto from "crypto"
 const register=async(req,res)=>{
     const {name,email,password}=req.body
     const user=await authService.register(name,email,password)
+     return res.redirect(
+    `/login?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
+  );
  ApiResponse.created(
     res,
     "Registration successful. Please verify your email.",
