@@ -38,6 +38,7 @@ const generateAuthorizationCode = async ({
   clientId,
   redirectUri,
 }) => {
+  
   if (!userId || !clientId || !redirectUri) {
     throw ApiError.badRequest("Missing required fields");
   }

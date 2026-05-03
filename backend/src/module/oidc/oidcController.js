@@ -70,12 +70,13 @@ const authorize = async (req, res) => {
     const returnTo = encodeURIComponent(req.originalUrl);
     return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
   }
+const code = await oidcService.generateAuthorizationCode({
+  userId,
+  clientId: client_id,
+  redirectUri: redirect_uri,
+});
 
-  const code = await oidcService.generateAuthorizationCode({
-    userId,
-    clientId: client_id,
-    redirectUri: redirect_uri,
-  });
+console.log("generated code:", code); // 👈
 
   return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
 };
