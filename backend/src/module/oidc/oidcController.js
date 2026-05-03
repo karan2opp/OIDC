@@ -77,8 +77,8 @@ const code = await oidcService.generateAuthorizationCode({
 });
 
 console.log("generated code:", code); // 👈
-
-  return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
+console.log("redirecting to:", `${redirect_uri}?code=${code}&state=${state || ""}`);
+return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
 };
 
 const token = async (req, res) => {
