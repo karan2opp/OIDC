@@ -30,11 +30,10 @@ const jwks = async (req, res) => {
 
 const authorize = async (req, res) => {
   const { client_id, redirect_uri, state } = req.query;
-console.log("authorize hit");
+  console.log("authorize hit");
   console.log("session id:", req.sessionID);
-  console.log("all cookies:", req.cookies);
   console.log("session user:", req.session.user);
-  console.log("returnTo:", req.session.returnTo);
+
   if (!client_id || !redirect_uri) {
     throw ApiError.badRequest("client_id and redirect_uri are required");
   }
@@ -50,10 +49,11 @@ console.log("authorize hit");
   if (!isValidRedirectUri) {
     throw ApiError.unauthorized("Invalid redirect URI");
   }
-if (!req.session.user) {
-  const returnTo = encodeURIComponent(req.originalUrl);
-  return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
-}
+
+  if (!req.session.user) {
+    const returnTo = encodeURIComponent(req.originalUrl);
+    return res.redirect(`${process.env.FRONTEND_URL}/login?returnTo=${returnTo}`);
+  }
 
   const code = await oidcService.generateAuthorizationCode({
     userId: req.session.user.id,
@@ -61,11 +61,8 @@ if (!req.session.user) {
     redirectUri: redirect_uri,
   });
 
-  return res.redirect(
-    `${redirect_uri}?code=${code}&state=${state || ""}`
-  );
+  return res.redirect(`${redirect_uri}?code=${code}&state=${state || ""}`);
 };
-
 const token = async (req, res) => {
   const {
     code,

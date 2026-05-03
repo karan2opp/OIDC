@@ -16,39 +16,23 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   console.log("login hit");
   console.log("login session id:", req.sessionID);
-  console.log("login returnTo:", req.session.returnTo);
-  console.log("login cookies:", req.cookies);
-  const {
-    user,
-    accessToken,
-    refreshToken,
-  } = await authService.login(email, password);
 
-  // Very important for OIDC SSO
+  const { user, accessToken, refreshToken } = await authService.login(email, password);
+
   req.session.user = {
     id: user._id,
     email: user.email,
   };
 
+  // save session before responding
+  await new Promise((resolve) => req.session.save(resolve));
+
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: true,
+    sameSite: "none", // 👈 changed from strict to none
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-if (req.session.returnTo) {
-  const state = crypto.randomBytes(16).toString("hex");
-  req.session.oauthState = state;
-  const url = req.session.returnTo;
-  req.session.returnTo = null;
- return ApiResponse.ok(res, "Login successful", {
-    user,
-    accessToken,
-    redirectTo: url, // 👈 send it to frontend
-  });
-}
-
-
 
   ApiResponse.ok(res, "Login successful", {
     user,

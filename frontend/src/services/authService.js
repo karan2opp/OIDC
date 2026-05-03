@@ -9,21 +9,21 @@ export const loginUser = async (payload, set) => {
     set({ loading: true, error: null });
 
     const res = await api.post("/auth/login", payload);
-    console.log("login response:", res.data);
     const responseData = res.data.data;
-    const params = new URLSearchParams(window.location.search);
-const returnTo = params.get("returnTo");
-    console.log("responseData:", responseData);
-    console.log("VITE_OIDC_URL:", import.meta.env.VITE_OIDC_URL);
-console.log("redirectTo:", res.data.data.redirectTo);
-if (responseData.redirectTo || returnTo) {
-  const url = responseData.redirectTo || decodeURIComponent(returnTo);
-  window.location.href = `${import.meta.env.VITE_OIDC_URL || "https://api.karanop.in"}${url}`;
-  return;
-}
 
-    const user = res.data.data.user;
-    const accessToken = res.data.data.accessToken;
+    // get returnTo from URL
+    const params = new URLSearchParams(window.location.search);
+    const returnTo = params.get("returnTo");
+    console.log("returnTo from URL:", returnTo);
+
+    if (returnTo) {
+      const oidcUrl = import.meta.env.VITE_OIDC_URL || "https://api.karanop.in";
+      window.location.href = `${oidcUrl}${decodeURIComponent(returnTo)}`;
+      return;
+    }
+
+    const user = responseData.user;
+    const accessToken = responseData.accessToken;
 
     set({
       user,
@@ -39,7 +39,6 @@ if (responseData.redirectTo || returnTo) {
       loading: false,
       error: error.response?.data?.message || "Login failed",
     });
-
     throw error;
   }
 };
