@@ -10,7 +10,8 @@ export const loginUser = async (payload, set) => {
 
     const res = await api.post("/auth/login", payload);
     const responseData = res.data.data;
-
+console.log("responseData:", responseData);
+console.log("loginToken:", responseData.loginToken); // 👈
     // get returnTo from URL
     const params = new URLSearchParams(window.location.search);
     const returnTo = params.get("returnTo");

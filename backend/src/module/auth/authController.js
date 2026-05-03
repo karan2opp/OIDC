@@ -27,7 +27,8 @@ const login = async (req, res) => {
 
   // generate short lived login token for OIDC flow
   const loginToken = generateAccessToken({ id: user._id, role: user.role });
-
+const loginToken = generateAccessToken({ id: user._id, role: user.role });
+console.log("loginToken:", loginToken); // 👈
   ApiResponse.ok(res, "Login successful", {
     user,
     accessToken,
