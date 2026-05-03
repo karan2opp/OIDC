@@ -50,15 +50,18 @@ console.log("authorize hit");
   if (!isValidRedirectUri) {
     throw ApiError.unauthorized("Invalid redirect URI");
   }
-
-  // ✅ FIXED LOGIN FLOW
-  if (!req.session.user) {
-    req.session.returnTo = req.originalUrl;
-
-    return req.session.save(() => {
-      res.redirect(`${process.env.FRONTEND_URL}/login`);
-    });
-  }
+if (!req.session.user) {
+  req.session.returnTo = req.originalUrl;
+  console.log("setting returnTo:", req.session.returnTo); // 👈
+  console.log("session before save:", req.session); // 👈
+  
+  return req.session.save((err) => {
+    console.log("session after save:", req.session); // 👈
+    console.log("session id after save:", req.sessionID); // 👈
+    if (err) console.log("save error:", err);
+    res.redirect(`${process.env.FRONTEND_URL}/login`);
+  });
+}
 
   const code = await oidcService.generateAuthorizationCode({
     userId: req.session.user.id,
