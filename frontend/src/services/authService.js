@@ -50,23 +50,18 @@ export const registerUser = async (payload, set) => {
   try {
     set({ loading: true, error: null });
 
-    const params = new URLSearchParams(window.location.search);
-    const res = await api.post(`/auth/register?${params.toString()}`, payload);
+    const res = await api.post("/auth/register", payload);
 
     set({ loading: false });
 
+    const params = new URLSearchParams(window.location.search);
+
     if (params.toString()) {
-      // 👇 build returnTo so loginUser can redirect to /authorize after login
-      const client_id = params.get("client_id");
-      const redirect_uri = params.get("redirect_uri");
-      const response_type = params.get("response_type");
-      const scope = params.get("scope");
-
       const returnTo = encodeURIComponent(
-        `/api/oidc/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
+        `/api/oidc/authorize?${params.toString()}`
       );
-
-      window.location.href = `/login?returnTo=${returnTo}`;
+      // 👇 use full URL not relative path
+      window.location.href = `https://auth.karanop.in/login?returnTo=${returnTo}`;
       return;
     }
 
