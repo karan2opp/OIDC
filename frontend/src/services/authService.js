@@ -50,17 +50,23 @@ export const registerUser = async (payload, set) => {
   try {
     set({ loading: true, error: null });
 
-    // 👇 get OIDC params from URL
     const params = new URLSearchParams(window.location.search);
-
-    // 👇 send params as query string to backend
     const res = await api.post(`/auth/register?${params.toString()}`, payload);
 
     set({ loading: false });
 
-    // 👇 redirect to login with same OIDC params
     if (params.toString()) {
-      window.location.href = `/login?${params.toString()}`;
+      // 👇 build returnTo so loginUser can redirect to /authorize after login
+      const client_id = params.get("client_id");
+      const redirect_uri = params.get("redirect_uri");
+      const response_type = params.get("response_type");
+      const scope = params.get("scope");
+
+      const returnTo = encodeURIComponent(
+        `/api/oidc/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}`
+      );
+
+      window.location.href = `/login?returnTo=${returnTo}`;
       return;
     }
 
