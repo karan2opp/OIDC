@@ -12,10 +12,13 @@ export const loginUser = async (payload, set) => {
     console.log("login response:", res.data);
     const responseData = res.data.data;
     console.log("responseData:", responseData);
+    console.log("VITE_OIDC_URL:", import.meta.env.VITE_OIDC_URL);
+console.log("redirectTo:", res.data.data.redirectTo);
 if (res.data.data.redirectTo) {
   window.location.href = `${import.meta.env.VITE_OIDC_URL}${res.data.data.redirectTo}`;
   return;
 }
+
     const user = res.data.data.user;
     const accessToken = res.data.data.accessToken;
 
