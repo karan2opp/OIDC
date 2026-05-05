@@ -1,32 +1,30 @@
 import { Resend } from 'resend';
+import 'dotenv/config';  // ES modules syntax
+const resend = new Resend(process.env.EMAIL_API_KEY);
 
-
-
-const resend = new Resend(`re_b43dSJKy_EbAXKBzhzbHbBWSTXQLmZTnA`);
-
-
-const sendVerificationEmail = async (email,token) => {
+const sendVerificationEmail = async (email, token) => {
   try {
-      const url = `http://localhost:8000/api/auth/verifyEmail/${token}`;
-    const response = await resend.emails.send({
-      from: 'onboarding@resend.dev',
-      to: 'knagpal119@gmail.com',
-      subject: 'Hello World',
-      html:  `<h2>Welcome!</h2><p>Click <a href="${url}">here</a> to verify your email.</p>`,
-    });
+    const url = `${process.env.CLIENT_URL}/api/auth/verifyEmail/${token}`;
+    
+await resend.emails.send({
+  from: "Karan <noreply@karanop.in>",
+  to: email,
+  subject: "Verify Your Email",
+  html: `<h2>Welcome!</h2><p>Click <a href="${url}">here</a> to verify your email.</p>`,
+});
 
-   
   } catch (error) {
-    console.log("Error:", error);
+    console.log("Error sending verification email:", error);
   }
 };
-const sendResetPasswordEmail = async (email,token) => {
+
+const sendResetPasswordEmail = async (email, token) => {
   try {
     const url = `${process.env.CLIENT_URL}/resetPassword/${token}`;
 
-    const response = await resend.emails.send({
-      from: 'onboarding@resend.dev',
-      to: 'knagpal119@gmail.com', // later make this dynamic
+    await resend.emails.send({
+      from: "Karan <noreply@karanop.in>",
+      to: email,                          // ✅ dynamic
       subject: 'Reset Your Password',
       html: `
         <h2>Password Reset</h2>
@@ -36,9 +34,9 @@ const sendResetPasswordEmail = async (email,token) => {
       `,
     });
 
-   
   } catch (error) {
-    console.log("Error:", error);
+    console.log("Error sending reset email:", error);
   }
 };
-export  {sendVerificationEmail,sendResetPasswordEmail};
+
+export { sendVerificationEmail, sendResetPasswordEmail };
